@@ -109,6 +109,7 @@ def scoring_dict():
 def dummy_model(preprocessor, X_train, y_train, scoring_metrics, results_dict):
 
     pipe_dummy = make_pipeline(preprocessor, DummyRegressor())
+
     results_dict["Dummy"] = mean_std_cross_val_scores(
         pipe_dummy,
         X_train,
@@ -118,9 +119,8 @@ def dummy_model(preprocessor, X_train, y_train, scoring_metrics, results_dict):
         n_jobs=-1,
     )
 
-    print(results_dict)
 
-
+# ridge tuning
 def tuned_ridge_model(preprocessor, X_train, y_train, scoring_metrics, results_dict):
 
     pipe_ridge = make_pipeline(preprocessor, Ridge())
@@ -136,7 +136,7 @@ def tuned_ridge_model(preprocessor, X_train, y_train, scoring_metrics, results_d
         "ridge__alpha": [5, 10, 20, 50, 100, 125],
     }
 
-    #
+    # randomized search
     random_search_ridge = RandomizedSearchCV(
         pipe_ridge,
         param_distributions=param_grid,
@@ -159,7 +159,121 @@ def tuned_ridge_model(preprocessor, X_train, y_train, scoring_metrics, results_d
         n_jobs=-1,
     )
 
-    print(results_dict)
+
+# random forest tuning
+
+
+def tuned_random_forest(preprocessor, X_train, y_train, scoring_metrics, results_dict):
+
+    pipe_RF = make_pipeline(preprocessor, RandomForestRegressor(random_state=123))
+
+    param_grid = {
+        "columntransformer__countvectorizer__max_features": [
+            200,
+            500,
+            1000,
+            1500,
+            2000,
+        ],
+        "randomforestregressor__n_estimators": [50, 150, 200, 250, 300],
+        "randomforestregressor__max_depth": [10, 25, 50, 100, 150],
+    }
+
+    random_search_RF = RandomizedSearchCV(
+        pipe_RF,
+        param_distributions=param_grid,
+        n_jobs=-1,
+        n_iter=5,
+        cv=3,
+        random_state=123,
+        return_train_score=True,
+        refit="R2",
+    )
+
+    random_search_RF.fit(X_train, y_train.values.ravel())
+
+    results_dict["Random Forest"] = mean_std_cross_val_scores(
+        random_search_RF,
+        X_train,
+        y_train.values.ravel(),
+        scoring=scoring_metrics,
+        return_train_score=True,
+        n_jobs=-1,
+    )
+
+
+def tuned_XGBR(preprocessor, X_train, y_train, scoring_metrics, results_dict):
+    pipe_XGBR = make_pipeline(
+        preprocessor,
+        XGBRegressor(random_state=123, eval_metric="logloss", verbosity=0),
+    )
+
+    param_grid = {
+        "columntransformer__countvectorizer__max_features": [
+            200,
+            500,
+            1000,
+            1500,
+            2000,
+        ],
+        "xgbregressor__max_depth": [10, 25, 50, 100, 150],
+    }
+
+    random_search_XGBR = RandomizedSearchCV(
+        pipe_XGBR,
+        param_distributions=param_grid,
+        n_jobs=-1,
+        n_iter=5,
+        cv=3,
+        random_state=123,
+        return_train_score=True,
+        refit="R2",
+    )
+
+    results_dict["XGBR"] = mean_std_cross_val_scores(
+        random_search_XGBR,
+        X_train,
+        y_train,
+        scoring=scoring_metrics,
+        return_train_score=True,
+        n_jobs=-1,
+    )
+
+
+def tuned_LGBMR(preprocessor, X_train, y_train, scoring_metrics, results_dict):
+    pipe_LGBMR = make_pipeline(preprocessor, LGBMRegressor(random_state=123))
+
+    param_grid = {
+        "columntransformer__countvectorizer__max_features": [
+            200,
+            500,
+            1000,
+            1500,
+            2000,
+        ],
+        "lgbmregressor__max_depth": [10, 25, 50, 100, 150],
+        "lgbmregressor__n_estimators": [50, 150, 200, 250, 300],
+    }
+
+    random_search_LGCMR = RandomizedSearchCV(
+        pipe_LGBMR,
+        param_distributions=param_grid,
+        n_jobs=-1,
+        n_iter=5,
+        cv=3,
+        random_state=123,
+        return_train_score=True,
+        refit="R2",
+    )
+
+    results_dict["LGBMR"] = mean_std_cross_val_scores(
+        random_search_LGCMR,
+        X_train,
+        y_train,
+        scoring=scoring_metrics,
+        return_train_score=True,
+        n_jobs=-1,
+    )
 
 
 def main(processed_data_path, results_path):
@@ -178,6 +292,14 @@ def main(processed_data_path, results_path):
     dummy_model(preprocessor, X_train, y_train, scoring_metrics, results)
 
     tuned_ridge_model(preprocessor, X_train, y_train, scoring_metrics, results)
+
+    tuned_random_forest(preprocessor, X_train, y_train, scoring_metrics, results)
+
+    tuned_XGBR(preprocessor, X_train, y_train, scoring_metrics, results)
+
+    tuned_LGBMR(preprocessor, X_train, y_train, scoring_metrics, results)
+
+    print(results)
 
 
 if __name__ == "__main__":
