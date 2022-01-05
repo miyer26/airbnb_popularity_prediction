@@ -5,12 +5,12 @@
 This script takes the raw data from the csv file, cleans it and converts 
 the data into a train and test split.
 
-Usage: clean_data.py --raw_data_path=<file_path> --train_data_path=<train_data_file> --test_data_path=<test_data_file> 
+Usage: clean_data.py --raw_data_path=<file_path> --train_data_path=<train_data_path> --test_data_path=<test_data_path> 
 
 Options: 
 --raw_data_path=<file_path>           The path to the raw AirBnB data 
---train_data_path=<test_data_path>    The path to the processed train split of the AirBnB data
---test_data_path=<train_data_path>    The path to the processed test split of the AirBnB data
+--train_data_path=<test_data_path>    The full path to the processed train split csv of the AirBnB data
+--test_data_path=<train_data_path>    The full path to the processed test split csv of the AirBnB data
 """
 
 import os
@@ -35,14 +35,14 @@ def main(raw_path, train_path, test_path):
     data = data.dropna(subset=["reviews_per_month"])
 
     # split the data into train and test
-    train_df, test_df = train_test_split(data, test_size=0.80, random_state=123)
+    train_df, test_df = train_test_split(data, test_size=0.9, random_state=123)
 
     shape_train = train_df.shape
     shape_test = test_df.shape
     print(f"The dimensions of the train data is {shape_train}")
     print(f"The dimensions of the test data is {shape_test}")
 
-    # creating the output directory for train
+    # creating the processed data file path for the train data
     path_check_train = (
         train_path.split("/", 3)[0:3][0]
         + "/"
@@ -53,7 +53,7 @@ def main(raw_path, train_path, test_path):
     if not os.path.exists(path_check_train):
         os.makedirs(path_check_train)
 
-    # creating the output directory for test
+    # creating the processed data file path for the test data
     path_check_test = (
         test_path.split("/", 3)[0:3][0]
         + "/"
@@ -64,6 +64,7 @@ def main(raw_path, train_path, test_path):
     if not os.path.exists(path_check_test):
         os.makedirs(path_check_test)
 
+    # saving the processed data files
     train_df.to_csv(train_path)
     test_df.to_csv(test_path)
 
