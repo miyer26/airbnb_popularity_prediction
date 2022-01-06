@@ -128,6 +128,8 @@ def main(train_path, results_folder_path):
     # correlation plot
     corr_plot(train_data, results_folder_path)
 
+    return
+
 
 if __name__ == "__main__":
     main(opt["--train_data_path"], opt["--results_folder_path"])

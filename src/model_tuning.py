@@ -5,7 +5,7 @@
 This script will carry out cross-validation and hyperparameter optimization for different models
 of the data.
 
-Usage: model_tuning.py --processed_data_path=<processed_data_path> --results_path=<results_path> 
+Usage: model_tuning.py --processed_data_path=<processed_data_path> --results_folder_path=<results_path> 
 
 Options: 
 --processed_data_path=<processed_data_path>   The path to the processed data folder
@@ -15,7 +15,6 @@ Options:
 
 
 from pandas.io.parsers import read_csv
-from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 from sklearn.tree import DecisionTreeRegressor, export_graphviz
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
@@ -27,11 +26,9 @@ from sklearn.metrics import mean_squared_error
 from sklearn.dummy import DummyRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import make_scorer
-from sklearn.pipeline import Pipeline, make_pipeline
+from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import (
-    cross_val_score,
     cross_validate,
-    train_test_split,
 )
 import pickle
 from docopt import docopt
@@ -203,6 +200,7 @@ def tuned_random_forest(preprocessor, X_train, y_train, scoring_metrics, results
 
 
 def tuned_XGBR(preprocessor, X_train, y_train, scoring_metrics, results_dict):
+
     pipe_XGBR = make_pipeline(
         preprocessor,
         XGBRegressor(random_state=123, eval_metric="logloss", verbosity=0),
@@ -230,10 +228,12 @@ def tuned_XGBR(preprocessor, X_train, y_train, scoring_metrics, results_dict):
         refit="R2",
     )
 
+    random_search_XGBR.fit(X_train, y_train.values.ravel())
+
     results_dict["XGBR"] = mean_std_cross_val_scores(
         random_search_XGBR,
         X_train,
-        y_train,
+        y_train.values.ravel(),
         scoring=scoring_metrics,
         return_train_score=True,
         n_jobs=-1,
@@ -241,6 +241,7 @@ def tuned_XGBR(preprocessor, X_train, y_train, scoring_metrics, results_dict):
 
 
 def tuned_LGBMR(preprocessor, X_train, y_train, scoring_metrics, results_dict):
+
     pipe_LGBMR = make_pipeline(preprocessor, LGBMRegressor(random_state=123))
 
     param_grid = {
@@ -266,10 +267,12 @@ def tuned_LGBMR(preprocessor, X_train, y_train, scoring_metrics, results_dict):
         refit="R2",
     )
 
+    random_search_LGCMR.fit(X_train, y_train.values.ravel())
+
     results_dict["LGBMR"] = mean_std_cross_val_scores(
         random_search_LGCMR,
         X_train,
-        y_train,
+        y_train.values.ravel(),
         scoring=scoring_metrics,
         return_train_score=True,
         n_jobs=-1,
@@ -279,7 +282,7 @@ def tuned_LGBMR(preprocessor, X_train, y_train, scoring_metrics, results_dict):
 def main(processed_data_path, results_path):
 
     # loading preprocessor object
-    preprocessor = load_preproc(results_path)
+    preprocessor = load_preproc(results_path + "/preprocessing")
 
     # loading X_train and y_train
     X_train = pd.read_csv(f"{processed_data_path}/X_train.csv", index_col=0)
@@ -299,8 +302,21 @@ def main(processed_data_path, results_path):
 
     tuned_LGBMR(preprocessor, X_train, y_train, scoring_metrics, results)
 
+    # create preprocessing folder in results folder
+    if not os.path.exists(results_path + "/model_tuning"):
+        os.makedirs(results_path + "/model_tuning")
+
+    # saving results dictionary as an object and csv file
+    with open(f"{results_path}/model_tuning/tuning_results.pickle", "wb") as f:
+        pickle.dump(results, f)
+    print("Tuning results object saved")
+
+    results_df = pd.DataFrame(results, index=[0])
+    results_df.to_csv(f"{results_path}/model_tuning/tuning_results.csv")
+    print("Tuning resutls csv saved")
+
     print(results)
 
 
 if __name__ == "__main__":
-    main(opt["--processed_data_path"], opt["--results_path"])
+    main(opt["--processed_data_path"], opt["--results_folder_path"])
