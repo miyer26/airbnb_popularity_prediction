@@ -1,0 +1,42 @@
+---
+title: "Plots"
+author: "Mukund Iyer"
+date: "1/6/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### EDA
+
+<img src="../results/eda/hist_latitude.png" title="Figure 1.1 Histogram of latitude" alt="Figure 1.1 Histogram of latitude" width="100%" />
+
+<img src="../results/eda/hist_longitude.png" title="Figure 1.2 Histogram of longitude" alt="Figure 1.2 Histogram of longitude" width="100%" />
+
+<img src="../results/eda/hist_availability_365.png" title="Figure 1.3 Histogram of availibility" alt="Figure 1.3 Histogram of availibility" width="100%" />
+
+<img src="../results/eda/hist_calculated_host_listings_count.png" title="Figure 1.4 Hisotgram of host listing counts" alt="Figure 1.4 Hisotgram of host listing counts" width="100%" />
+
+<img src="../results/eda/hist_price.png" title="Figure 1.5 Histogram of price" alt="Figure 1.5 Histogram of price" width="100%" />
+
+<img src="../results/eda/hist_reviews_per_month.png" title="Figure 1.6 Histogram of reviews per month" alt="Figure 1.6 Histogram of reviews per month" width="100%" />
+
+<img src="../results/eda/scatter_long_lat.png" title="Figure 1.7 Scatter plot of longitude and latitude" alt="Figure 1.7 Scatter plot of longitude and latitude" width="100%" />
+
+<img src="../results/eda/scatter_price_min_nights.png" title="Figure 1.8 Scatter of minimum price nights" alt="Figure 1.8 Scatter of minimum price nights" width="100%" />
+
+<img src="../results/eda/scatter_hostlistings_availability.png" title="Figure 1.9 Scatter of host listings and availability" alt="Figure 1.9 Scatter of host listings and availability" width="100%" />
+
+<img src="../results/eda/correlation.png" title="Figure 1.10 Correlation plot" alt="Figure 1.10 Correlation plot" width="100%" />
+
+### Model evaluation 
+
+<img src="../results/model_evaluation/feat_imp_global.png" title="Figure 1.1 Global feature importance" width="100%" />
+
+<img src="../results/model_evaluation/feat_imp_mag_dir.png" title="Figure 1.2 Plot of feature magnitude and direction" width="100%" />
+
+<img src="../results/model_evaluation/force_plot_1.png" title="Figure 1.3 Force plot of first example" width="100%" />
+
+<img src="../results/model_evaluation/force_plot_2.png" title="Figure 1.4 Force plot of second example" width="100%" />
